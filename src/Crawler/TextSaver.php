@@ -12,7 +12,6 @@ use andreskrey\Readability\Configuration;
 use andreskrey\Readability\ParseException;
 use andreskrey\Readability\Readability;
 use Curl\Curl;
-use Symfony\Component\Console\Output\OutputInterface;
 
 
 class TextSaver
@@ -23,14 +22,14 @@ class TextSaver
     private $url;
 
     /**
-     * @var OutputInterface $output
-     */
-    private $output;
-
-    /**
      * @var string $base_directory
      */
     private $base_directory;
+
+    /**
+     * @var string $errorMessage
+     */
+    private $errorMessage;
 
     /**
      * TextSaver constructor.
@@ -41,7 +40,6 @@ class TextSaver
     public function __construct($url, $output)
     {
         $this->url = $url;
-        $this->output = $output;
         $this->base_directory = (__DIR__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'output';
         $this->createDirectory($this->base_directory);
     }
@@ -91,17 +89,23 @@ class TextSaver
                 if ($this->createDirectory($path)) {
                     $title = str_replace('/', '-', $this->getFileNameFromUrl());
                     $fileContent = strip_tags($readability->getTitle() . PHP_EOL . $readability->getContent());
-                    $result = file_put_contents($path . DIRECTORY_SEPARATOR . $title . '.txt', $fileContent);
+                    $fileName = $path . DIRECTORY_SEPARATOR . $title . '.txt';
+                    $result = file_put_contents($fileName, $fileContent);
+                    if (($result === false) || ($result == -1)) {
+                        $this->errorMessage = 'Couldn\'t save text to file ' . $fileName;
+                    }
                 }
             } catch (ParseException $e) {
-                echo sprintf('Error processing text: %s', $e->getMessage());
+                $this->errorMessage = 'Error processing text: ' . $e->getMessage();
             }
+        } else {
+            $this->errorMessage = 'Error getting page text: '. $curl->errorCode.' - '. $curl->errorMessage;
         }
         return $result;
     }
 
     /**
-     * Имя файла генерируем из ссылки, если нет Title
+     * Имя файла генерируем из ссылки
      * @return string
      */
     private function getFileNameFromUrl()
@@ -112,5 +116,10 @@ class TextSaver
         $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
         $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
         return $user . '-' . $host . '-' . $port . '-' . $path;
+    }
+
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
     }
 }

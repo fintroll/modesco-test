@@ -43,19 +43,24 @@ class ConsoleCrawler
      */
     private $url;
 
-
     /**
      * @var OutputInterface $output
      */
     private $output;
 
-    public function __construct($url, $output)
+    /**
+     * @var int $depth
+     */
+    private $depth;
+
+    public function __construct($url, $output, $depth = null)
     {
         $this->url = $url;
         $this->base_url = $this->extractBaseUrl();
         $this->found_urls = [];
         $this->crawled_urls = [];
         $this->output = $output;
+        $this->depth = is_numeric($depth) ? $depth : 1;
     }
 
     private function extractBaseUrl()
@@ -77,7 +82,7 @@ class ConsoleCrawler
      */
     public function crawlSite()
     {
-        $this->crawlPage($this->base_url, 1);
+        $this->crawlPage($this->base_url, $this->depth);
     }
 
     /**

@@ -6,11 +6,6 @@
     "php-curl-class/php-curl-class": "^8.5"
   },
   "autoload": {
-    "psr-4": {
-      "Console\\": "src"
-    },
-    "classmap": [
-      "src"
-    ]
+    "psr-4": { "": "src/" }
   }
 }
