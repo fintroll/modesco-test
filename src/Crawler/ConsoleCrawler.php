@@ -60,7 +60,7 @@ class ConsoleCrawler
         $this->found_urls = [];
         $this->crawled_urls = [];
         $this->output = $output;
-        $this->depth = is_numeric($depth) ? $depth : 1;
+        $this->depth = is_numeric($depth) ? (int)$depth : 1;
     }
 
     private function extractBaseUrl()
